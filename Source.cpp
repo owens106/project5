@@ -7,15 +7,30 @@
 #include <stdio.h>
 #include <vector>
 
+using namespace std;
 
+class Point {
+public:
+	double xcord;
+	double ycord;
+	double zcord;
+};
 
 static int window; //variable that hold main window
 GLfloat xRotated, yRotated, zRotated;
-GLdouble radius = 1;
+GLdouble radius = 1.0;
 double xcord = 0;
 double ycord = 0;
 
+double xpoint = 0;
+double ypoint = 0;
 
+float m[16];
+
+BOOLEAN addPoint = false;
+BOOLEAN lmbd = false;
+
+vector<Point> vec;
 
 
 void init() {
@@ -29,6 +44,7 @@ void init() {
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
 	glEnable(GL_LIGHTING);
+	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_DEPTH_TEST);
 
@@ -74,8 +90,45 @@ void display() {
 	// scaling transfomation 
 	glScalef(1.0, 1.0, 1.0);
 	// built-in (glut library) function , draw you a sphere.
-	glutSolidSphere(radius, 200, 200);
+	glColor3f(1.0, 1.0, 0.0);
+
+	glutWireSphere(radius, 20, 20);
 	// Flush buffers to screen
+	if (addPoint) {
+		//derive from x^2 + y^2 + z^2 = r^2
+		double zval = sqrt(abs(pow(xpoint, 2) + pow(ypoint, 2) - pow(radius, 2)));
+		printf("in add point\n");
+		glGetFloatv(GL_MODELVIEW_MATRIX, m);
+		float xval = xpoint * m[0] + ypoint * m[1] + zval * m[2];
+		float yval = xpoint * m[4] + ypoint * m[5] + zval * m[6];
+		float zvalFinal = xpoint * m[8] + ypoint * m[9] + zval * m[10];
+		Point point;
+		point.xcord = xval;
+		point.ycord = yval;
+		point.zcord = zvalFinal;
+		vec.push_back(point);
+		addPoint = false;
+	}
+
+	for (int i = 0; i < vec.size(); i++) {
+		glBegin(GL_POLYGON);
+		double tempxcord = vec.at(i).xcord;
+		double tempycord = vec.at(i).ycord;
+		double tempzcord = vec.at(i).zcord;
+
+		printf("\ntempxCord: %f", tempxcord);
+
+		glVertex3f(tempxcord - 0.1, tempycord-0.1, tempzcord);
+		glVertex3f(tempxcord - 0.1, tempycord+0.1, tempzcord);
+		glVertex3f(tempxcord + 0.1, tempycord+0.1, tempzcord);
+		glVertex3f(tempxcord+0.1, tempycord-0.1, tempzcord);
+		glEnd();
+
+	}
+
+	//draw all points in vector
+	
+
 
 	glFlush();
 	// sawp buffers called because we are using double buffering 
@@ -109,7 +162,20 @@ void mouseClick(int button, int mode, int x, int y) {
 		//left mouse down
 		xcord = x;
 		ycord = y;
+		lmbd = true;
 	}
+
+	if (button == 0 && mode == 1) {//release lmb
+		lmbd = false;
+	}
+
+	if (button == 2 && mode == 0) {
+		addPoint = true;
+		xpoint = x/(glutGet(GLUT_WINDOW_WIDTH));
+		ypoint = y / (glutGet(GLUT_WINDOW_HEIGHT));
+		glutPostOverlayRedisplay();
+	}
+
 
 	//printf("Xrotated:   %f,  Yrotated   %f", xRotated, yRotated);
 	return;
@@ -118,29 +184,31 @@ void mouseMotion(int x, int y) {
 	// called when the mouse moves
 	// active motion means a button is down
 	//printf("mouse down at pos: %d , %d\n", x, y);
-	GLfloat xdiff = xcord - x;
-	GLfloat ydiff = ycord - y;
-	xcord = x;
-	ycord = y;
-	printf("inside mouse motion with x: %d, y: %d\nxdiff: %f, ydiff: %f\n", x, y, xdiff, ydiff);
-	if (xdiff >= 0 && ydiff >= 0) {
-		yRotated += xdiff;
-		xRotated -= ydiff;
+	if (lmbd) {
+		GLfloat xdiff = xcord - x;
+		GLfloat ydiff = ycord - y;
+		xcord = x;
+		ycord = y;
+		printf("inside mouse motion with x: %d, y: %d\nxdiff: %f, ydiff: %f\n", x, y, xdiff, ydiff);
+		if (xdiff >= 0 && ydiff >= 0) {
+			yRotated += xdiff;
+			xRotated -= ydiff;
+		}
+		else if (xdiff >= 0 && ydiff <= 0) {
+			yRotated += xdiff;
+			xRotated -= ydiff;
+		}
+		else if (xdiff <= 0 && ydiff >= 0) {
+			yRotated += xdiff;
+			xRotated -= ydiff;
+		}
+		else if (xdiff <= 0 && ydiff <= 0) {
+			yRotated += xdiff;
+			xRotated += ydiff;
+		}
+		display();
+		return;
 	}
-	else if (xdiff >= 0 && ydiff <= 0) {
-		yRotated += xdiff;
-		xRotated -= ydiff;
-	}
-	else if (xdiff <= 0 && ydiff >= 0) {
-		yRotated += xdiff;
-		xRotated -= ydiff;
-	}
-	else if (xdiff <= 0 && ydiff <= 0) {
-		yRotated += xdiff;
-		xRotated += ydiff;
-	}
-	display();
-	return;
 }
 void resize(int width, int height) {
 	//this is called on window resize
