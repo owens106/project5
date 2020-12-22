@@ -50,6 +50,92 @@ void init() {
 
 }
 
+void drawCubeLocation(GLfloat xcenter, GLfloat ycenter, GLfloat size, GLfloat zpos) {
+
+	glBegin(GL_POLYGON); //front face
+
+	glColor3f(1.0, 0.0, 0.0);
+	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
+
+	glColor3f(0.0, 1.0, 0.0);
+	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
+
+	glColor3f(0.0, 0.0, 1.0);
+	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
+
+	glColor3f(1.0, 0.0, 1.0);
+	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
+
+	glEnd();
+
+	glBegin(GL_POLYGON);//back face
+	glColor3f(1.0, 1.0, 1.0);
+	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
+	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
+	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
+	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
+	glEnd();
+
+	glBegin(GL_TRIANGLES);
+	glColor3f(1.0, 1.0, 0.0);
+
+	glVertex3f(0, 0, 0);
+	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
+	glVertex3f(xcenter - size + 0.02, ycenter + size, zpos + size); //top left
+
+	glVertex3f(0, 0, 0);
+	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
+	glVertex3f(xcenter - size + .02, ycenter - size, zpos + size); //bottom left
+
+	glVertex3f(0, 0, 0);
+	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
+	glVertex3f(xcenter + size + .02, ycenter - size, zpos + size); //bottom right
+
+	glVertex3f(0, 0, 0);
+	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
+	glVertex3f(xcenter + size + 0.02, ycenter + size, zpos + size); //top right
+
+
+
+
+	glEnd();
+
+
+	glBegin(GL_POLYGON); //left face
+	glColor3f(0.0, 1.0, 0.0);
+	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
+	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
+	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
+	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
+	glEnd();
+
+	glBegin(GL_POLYGON);//right face
+	glColor3f(1.0, 0.0, 1.0);
+	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
+	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
+	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
+	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
+	glEnd();
+
+	glBegin(GL_POLYGON);//top face
+	glColor3f(0.0, 0.0, 1.0);
+	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
+	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
+	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
+	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
+	glEnd();
+
+	glBegin(GL_POLYGON);//bottom face
+	glColor3f(1.0, 0.0, 0.0);
+	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
+	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
+	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
+	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
+	glEnd();
+
+	glFlush();
+}
+
 
 void reshape(int x, int y)
 {
@@ -57,8 +143,7 @@ void reshape(int x, int y)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	glOrtho(-1.5, 1.5, -1.5 * (GLfloat)480 / (GLfloat)640,
-		1.5 * (GLfloat)480 / (GLfloat)640, -10.0, 10.0);
+	glOrtho(-1.0, 1.0, -1.0,1.0, -10.0, 10.0);
 
 	//gluPerspective(39.0, (GLdouble)x / (GLdouble)y, 0.1, 21.0);
 	glMatrixMode(GL_MODELVIEW);
@@ -92,14 +177,14 @@ void display() {
 	// built-in (glut library) function , draw you a sphere.
 	glColor3f(1.0, 1.0, 0.0);
 
-	glutWireSphere(radius, 20, 20);
+	glutSolidSphere(radius, 20, 20);
 	// Flush buffers to screen
 	if (addPoint) {
 		//derive from x^2 + y^2 + z^2 = r^2
 		double zval = sqrt(abs(pow(xpoint, 2) + pow(ypoint, 2) - pow(radius, 2)));
 		printf("in add point\n");
 		glGetFloatv(GL_MODELVIEW_MATRIX, m);
-		float xval = xpoint * m[0] + ypoint * m[1] + zval * m[2];
+		float xval = (xpoint * m[0] + ypoint * m[1] + zval * m[2]);
 		float yval = xpoint * m[4] + ypoint * m[5] + zval * m[6];
 		float zvalFinal = xpoint * m[8] + ypoint * m[9] + zval * m[10];
 		Point point;
@@ -118,11 +203,7 @@ void display() {
 
 		printf("\ntempxCord: %f", tempxcord);
 
-		glVertex3f(tempxcord - 0.1, tempycord-0.1, tempzcord);
-		glVertex3f(tempxcord - 0.1, tempycord+0.1, tempzcord);
-		glVertex3f(tempxcord + 0.1, tempycord+0.1, tempzcord);
-		glVertex3f(tempxcord+0.1, tempycord-0.1, tempzcord);
-		glEnd();
+		drawCubeLocation(tempxcord, tempycord, 0.02, tempzcord);
 
 	}
 
@@ -163,6 +244,7 @@ void mouseClick(int button, int mode, int x, int y) {
 		xcord = x;
 		ycord = y;
 		lmbd = true;
+
 	}
 
 	if (button == 0 && mode == 1) {//release lmb
@@ -171,9 +253,18 @@ void mouseClick(int button, int mode, int x, int y) {
 
 	if (button == 2 && mode == 0) {
 		addPoint = true;
-		xpoint = x/(glutGet(GLUT_WINDOW_WIDTH));
-		ypoint = y / (glutGet(GLUT_WINDOW_HEIGHT));
-		glutPostOverlayRedisplay();
+
+		//TODO always = 0,0 due to int divison. figure out why real values are off.
+		//xpoint = x/(glutGet(GLUT_WINDOW_WIDTH));
+		//ypoint = y / (glutGet(GLUT_WINDOW_HEIGHT));
+
+		xpoint = 2.0f * ((GLfloat)x + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_WIDTH)) - 1.0f;
+		 ypoint = -1 * (2.0f * ((GLfloat)y + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_HEIGHT)) - 1.0f);
+
+
+		printf("xpoint: %f, ypoint: %finsdie mouseclick\n",xpoint, ypoint);
+
+		glutPostRedisplay();
 	}
 
 
@@ -185,8 +276,8 @@ void mouseMotion(int x, int y) {
 	// active motion means a button is down
 	//printf("mouse down at pos: %d , %d\n", x, y);
 	if (lmbd) {
-		GLfloat xdiff = xcord - x;
-		GLfloat ydiff = ycord - y;
+		GLfloat xdiff = xcord - (GLfloat)x;
+		GLfloat ydiff = ycord - (GLfloat)y;
 		xcord = x;
 		ycord = y;
 		printf("inside mouse motion with x: %d, y: %d\nxdiff: %f, ydiff: %f\n", x, y, xdiff, ydiff);
@@ -224,7 +315,7 @@ The main function.
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
-	glutInitWindowSize(640, 480);
+	glutInitWindowSize(480, 480);
 	glutCreateWindow("Solid Sphere");
 	zRotated = 30.0;
 	xRotated = 0;
