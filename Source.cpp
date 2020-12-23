@@ -11,9 +11,9 @@ using namespace std;
 
 class Point {
 public:
-	double xcord;
-	double ycord;
-	double zcord;
+	GLfloat xcord;
+	GLfloat ycord;
+	GLfloat zcord;
 };
 
 static int window; //variable that hold main window
@@ -76,30 +76,7 @@ void drawCubeLocation(GLfloat xcenter, GLfloat ycenter, GLfloat size, GLfloat zp
 	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
 	glEnd();
 
-	glBegin(GL_TRIANGLES);
-	glColor3f(1.0, 1.0, 0.0);
-
-	glVertex3f(0, 0, 0);
-	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
-	glVertex3f(xcenter - size + 0.02, ycenter + size, zpos + size); //top left
-
-	glVertex3f(0, 0, 0);
-	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
-	glVertex3f(xcenter - size + .02, ycenter - size, zpos + size); //bottom left
-
-	glVertex3f(0, 0, 0);
-	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
-	glVertex3f(xcenter + size + .02, ycenter - size, zpos + size); //bottom right
-
-	glVertex3f(0, 0, 0);
-	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
-	glVertex3f(xcenter + size + 0.02, ycenter + size, zpos + size); //top right
-
-
-
-
-	glEnd();
-
+	
 
 	glBegin(GL_POLYGON); //left face
 	glColor3f(0.0, 1.0, 0.0);
@@ -177,7 +154,7 @@ void display() {
 	// built-in (glut library) function , draw you a sphere.
 	glColor3f(1.0, 1.0, 0.0);
 
-	glutSolidSphere(radius, 20, 20);
+	glutWireSphere(radius, 20, 20);
 	// Flush buffers to screen
 	if (addPoint) {
 		//derive from x^2 + y^2 + z^2 = r^2
@@ -205,7 +182,40 @@ void display() {
 
 		drawCubeLocation(tempxcord, tempycord, 0.02, tempzcord);
 
+
 	}
+
+		//draw lines between each vector, will eventually become curve loop
+		glBegin(GL_LINES);
+		for (int i = 0; i < vec.size(); i++) {
+			double tempxcord = vec.at(i).xcord;
+			double tempycord = vec.at(i).ycord;
+			double tempzcord = vec.at(i).zcord;
+			//glVertex3f(tempxcord, tempycord, tempzcord);
+			/*if (vec.size() == 2) { //need to generate points between the two end points so that their z coord can be mapped to the surface of sphere.
+				GLfloat tempFirstx = vec.at(1).xcord;
+				GLfloat tempFirsty = vec.at(1).ycord;
+				GLfloat tempFirstz = vec.at(1).zcord;
+
+				GLfloat tempsecondx = vec.at(2).xcord;
+				GLfloat tempsecondy = vec.at(2).ycord;
+				GLfloat tempsecondz = vec.at(2).zcord;
+
+				float min = tempFirstx;
+				if (tempsecondx < tempFirstx) {
+					min = tempsecondx;
+				}
+
+
+
+				float xdiff = abs(tempFirstx - tempsecondx);
+				float yiff = abs(tempFirsty - tempsecondy);
+
+
+			}*/
+		}
+		glEnd();
+	
 
 	//draw all points in vector
 	
