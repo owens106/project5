@@ -68,8 +68,8 @@ void slerp(vector<Point> vec) {
 
 		float dot = (p0.xcord * p1.xcord) + (p0.ycord * p1.ycord) + (p0.zcord * p1.zcord); //dot product
 		
-		float angle = acos(dot * (len0 * len1)); //angle between two vectors
-		//angle = angle * 180 / PI; 
+		float angle = acos(dot / (len0 * len1)); //angle between two vectors
+		
 		printf("angle:%f\n", angle);
 
 		Point nextPoint;
@@ -89,6 +89,14 @@ void slerp(vector<Point> vec) {
 			float xcord = alpha * globalP0.xcord + beta * globalP1.xcord;
 			float ycord = alpha * globalP0.ycord + beta * globalP1.ycord;
 			float zcord = alpha * globalP0.zcord + beta * globalP1.zcord;
+
+			/*glGetFloatv(GL_MODELVIEW_MATRIX, m);
+			 xcord = (xcord * m[0] + ycord * m[1] + zcord * m[2]);
+			 ycord = xcord * m[4] + ycord * m[5] + zcord * m[6];
+			 zcord = xcord * m[8] + ycord * m[9] + zcord * m[10];
+			 */
+
+
 			glVertex3f(xcord, ycord, zcord);
 		}
 		glEnd();
