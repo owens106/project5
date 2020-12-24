@@ -27,6 +27,7 @@ double xpoint = 0;
 double ypoint = 0;
 
 float m[16];
+float y[16];
 
 BOOLEAN addPoint = false;
 BOOLEAN lmbd = false;
@@ -34,6 +35,8 @@ BOOLEAN lmbd = false;
 float globalAngle = 0;
 Point globalP0;
 Point globalP1;
+
+float timevar;
 
 vector<Point> vec;
 
@@ -43,7 +46,7 @@ void slerp(vector<Point> vec) {
 		return;
 	}
 
-	float t = 0.666f;
+	float t = 0.266;
 
 	vector<Point> tempVec;
 	for (int i = 0; i < vec.size()-1; i++) {
@@ -68,7 +71,7 @@ void slerp(vector<Point> vec) {
 
 		float dot = (p0.xcord * p1.xcord) + (p0.ycord * p1.ycord) + (p0.zcord * p1.zcord); //dot product
 		
-		float angle = acos(dot / (len0 * len1)); //angle between two vectors
+		float angle = acos(dot / (1 * 1)); //angle between two vectors
 		
 		printf("angle:%f\n", angle);
 
@@ -84,18 +87,48 @@ void slerp(vector<Point> vec) {
 
 		glBegin(GL_LINE_STRIP);
 		for (float i = 0; i <= 1; i += 0.01f) {
-			float alpha = sin((1 - i) * globalAngle) / sin(globalAngle);
-			float beta = sin(i * globalAngle) / sin(globalAngle);
-			float xcord = alpha * globalP0.xcord + beta * globalP1.xcord;
-			float ycord = alpha * globalP0.ycord + beta * globalP1.ycord;
-			float zcord = alpha * globalP0.zcord + beta * globalP1.zcord;
+			float alpha = sin((1 - i) * angle) / sin(angle);
+			float beta = sin(i * angle) / sin(angle);
+
+			float fixedP0xcord, fixedP0ycord, fixedP0zcord, fixedP1xcord, fixedP1ycord, fixedP1zcord;
+			glGetFloatv(GL_MODELVIEW_MATRIX, m);
+
+			//printf("testing: %f : %f : %f\n", y[0], y[1],y[2]);
+
+
+			/*fixedP0xcord = globalP0.xcord * m[0] + globalP0.ycord * m[1] + globalP0.zcord * y[2];
+			fixedP0ycord = globalP0.xcord * m[4] + globalP0.ycord * m[5] + globalP0.zcord * m[6];
+			fixedP0zcord = globalP0.xcord * m[8] + globalP0.ycord * m[9] + globalP0.zcord * m[10];
+
+			fixedP1xcord = globalP1.xcord * m[0] + globalP1.ycord * m[1] + globalP1.zcord * m[2];
+			fixedP1ycord = globalP1.xcord * m[4] + globalP1.ycord * m[5] + globalP1.zcord * m[6];
+			fixedP1zcord = globalP1.xcord * m[8] + globalP1.ycord * m[9] + globalP1.zcord * m[10];
+
+			float xcordDraw = alpha * fixedP0xcord + beta * fixedP1xcord;
+			float ycordDraw = alpha * fixedP0ycord + beta * fixedP1ycord;
+			float zcordDraw = alpha * fixedP0zcord + beta * fixedP1zcord;
+			*/
+
+			//printf("xcord: %f, ycord: %f, z cord:%f\n", xcordDraw, ycordDraw, zcordDraw);
+			
+
+			float xcord = alpha * p0.xcord + beta * p1.xcord;
+			float ycord = alpha * p0.ycord + beta * p1.ycord;
+			float zcord = alpha * p0.zcord + beta * p1.zcord;
+			//printf("xcord: %f, ycord: %f, z cord: %f\n", xcord, ycord, zcord);
+			
 
 			/*glGetFloatv(GL_MODELVIEW_MATRIX, m);
+
 			 xcord = (xcord * m[0] + ycord * m[1] + zcord * m[2]);
 			 ycord = xcord * m[4] + ycord * m[5] + zcord * m[6];
 			 zcord = xcord * m[8] + ycord * m[9] + zcord * m[10];
+			// printf("xcord: %f, ycord: %f, z cord: %f\n", xcord, ycord, zcord);
+			 printf("testing123: %f: %f: %f\n", m[0], m[1], m[2]);
+			 printf("testing123: %f: %f: %f\n", y[0], y[1], y[2]);
 			 */
 
+			//glVertex3f(xcordDraw, ycordDraw, zcordDraw);
 
 			glVertex3f(xcord, ycord, zcord);
 		}
@@ -218,12 +251,19 @@ void display() {
 	//glColor3f(0.9, 0.3, 0.2);
 	// changing in transformation matrix.
 	// rotation about X axis
+
+
 	glRotatef(xRotated, 1.0, 0.0, 0.0);
 	// rotation about Y axis
+
+
 	glRotatef(yRotated, 0.0, 1.0, 0.0);
 	// rotation about Z axis
+
+
 	glRotatef(zRotated, 0.0, 0.0, 1.0);
 	// scaling transfomation 
+
 	glScalef(1.0, 1.0, 1.0);
 	// built-in (glut library) function , draw you a sphere.
 	glColor3f(1.0, 1.0, 0.0);
@@ -234,7 +274,7 @@ void display() {
 		//derive from x^2 + y^2 + z^2 = r^2
 		double zval = sqrt(abs(pow(xpoint, 2) + pow(ypoint, 2) - pow(radius, 2)));
 		glGetFloatv(GL_MODELVIEW_MATRIX, m);
-		float xval = (xpoint * m[0] + ypoint * m[1] + zval * m[2]);
+		float xval = (xpoint * m[0] + ypoint * m[1] + zval * m[2]); //fix points to align with 
 		float yval = xpoint * m[4] + ypoint * m[5] + zval * m[6];
 		float zvalFinal = xpoint * m[8] + ypoint * m[9] + zval * m[10];
 		Point point;
@@ -257,9 +297,9 @@ void display() {
 
 	}
 	
-	if (vec.size() > 1) {
+	if (vec.size() > 1) {			
 		slerp(vec);
-		
+			
 	}
 	
 
