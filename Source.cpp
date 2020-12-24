@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace std;
+# define PI		3.14159265358979323846
 
 class Point {
 public:
@@ -30,7 +31,72 @@ float m[16];
 BOOLEAN addPoint = false;
 BOOLEAN lmbd = false;
 
+float globalAngle = 0;
+Point globalP0;
+Point globalP1;
+
 vector<Point> vec;
+
+
+void slerp(vector<Point> vec) {
+	if (vec.size() == 1) {
+		return;
+	}
+
+	float t = 0.666f;
+
+	vector<Point> tempVec;
+	for (int i = 0; i < vec.size()-1; i++) {
+		printf("size:%d", vec.size());
+		Point p0 = vec.at(i);
+		Point p1 = vec.at(i + 1);
+
+		float len0 = sqrt((pow(p0.xcord, 2)) + (pow(p0.ycord, 2)) + (pow(p0.zcord, 2))); //magnitube
+		float len1 = sqrt((pow(p1.xcord, 2)) + (pow(p1.ycord, 2)) + (pow(p1.zcord, 2)));
+		globalP0 = p0;
+		globalP1 = p1;
+		
+		p0.xcord = p0.xcord / len0; //normalize
+		p0.ycord = p0.ycord / len0;
+		p0.zcord = p0.zcord / len0;
+
+		p1.xcord = p1.xcord / len1;
+		p1.ycord = p1.ycord / len1;
+		p1.zcord = p1.zcord / len1;
+
+
+
+		float dot = (p0.xcord * p1.xcord) + (p0.ycord * p1.ycord) + (p0.zcord * p1.zcord); //dot product
+		
+		float angle = acos(dot * (len0 * len1)); //angle between two vectors
+		//angle = angle * 180 / PI; 
+		printf("angle:%f\n", angle);
+
+		Point nextPoint;
+		float alpha = (sin(1 - t) * angle) / sin(angle);
+		float beta = sin(t * angle) / sin(angle);
+		nextPoint.xcord = alpha * p0.xcord + beta * p1.xcord;
+		nextPoint.ycord = alpha * p0.ycord + beta * p1.ycord;
+		nextPoint.zcord = alpha * p0.zcord + beta * p0.zcord;
+		tempVec.push_back(nextPoint);
+		globalAngle = angle;
+
+
+		glBegin(GL_LINE_STRIP);
+		for (float i = 0; i <= 1; i += 0.01f) {
+			float alpha = sin((1 - i) * globalAngle) / sin(globalAngle);
+			float beta = sin(i * globalAngle) / sin(globalAngle);
+			float xcord = alpha * globalP0.xcord + beta * globalP1.xcord;
+			float ycord = alpha * globalP0.ycord + beta * globalP1.ycord;
+			float zcord = alpha * globalP0.zcord + beta * globalP1.zcord;
+			glVertex3f(xcord, ycord, zcord);
+		}
+		glEnd();
+		
+	}
+
+	slerp(tempVec);
+}
 
 
 void init() {
@@ -159,7 +225,6 @@ void display() {
 	if (addPoint) {
 		//derive from x^2 + y^2 + z^2 = r^2
 		double zval = sqrt(abs(pow(xpoint, 2) + pow(ypoint, 2) - pow(radius, 2)));
-		printf("in add point\n");
 		glGetFloatv(GL_MODELVIEW_MATRIX, m);
 		float xval = (xpoint * m[0] + ypoint * m[1] + zval * m[2]);
 		float yval = xpoint * m[4] + ypoint * m[5] + zval * m[6];
@@ -178,48 +243,17 @@ void display() {
 		double tempycord = vec.at(i).ycord;
 		double tempzcord = vec.at(i).zcord;
 
-		printf("\ntempxCord: %f", tempxcord);
 
 		drawCubeLocation(tempxcord, tempycord, 0.02, tempzcord);
 
 
 	}
-
-		//draw lines between each vector, will eventually become curve loop
-		glBegin(GL_LINES);
-		for (int i = 0; i < vec.size(); i++) {
-			double tempxcord = vec.at(i).xcord;
-			double tempycord = vec.at(i).ycord;
-			double tempzcord = vec.at(i).zcord;
-			//glVertex3f(tempxcord, tempycord, tempzcord);
-			/*if (vec.size() == 2) { //need to generate points between the two end points so that their z coord can be mapped to the surface of sphere.
-				GLfloat tempFirstx = vec.at(1).xcord;
-				GLfloat tempFirsty = vec.at(1).ycord;
-				GLfloat tempFirstz = vec.at(1).zcord;
-
-				GLfloat tempsecondx = vec.at(2).xcord;
-				GLfloat tempsecondy = vec.at(2).ycord;
-				GLfloat tempsecondz = vec.at(2).zcord;
-
-				float min = tempFirstx;
-				if (tempsecondx < tempFirstx) {
-					min = tempsecondx;
-				}
-
-
-
-				float xdiff = abs(tempFirstx - tempsecondx);
-				float yiff = abs(tempFirsty - tempsecondy);
-
-
-			}*/
-		}
-		glEnd();
 	
-
-	//draw all points in vector
+	if (vec.size() > 1) {
+		slerp(vec);
+		
+	}
 	
-
 
 	glFlush();
 	// sawp buffers called because we are using double buffering 
@@ -247,8 +281,6 @@ Mouse Handler
 void mouseClick(int button, int mode, int x, int y) {
 	// event happens once on pushing the button and once more when releasing it
 	// button identifies what you clicked, mode if its down or up
-	printf("%d, %d , %d, %d\n", button, mode, x, y);
-	printf("mouseclicked\n");
 	if (button == 0 && mode == 0) {
 		//left mouse down
 		xcord = x;
@@ -272,7 +304,6 @@ void mouseClick(int button, int mode, int x, int y) {
 		 ypoint = -1 * (2.0f * ((GLfloat)y + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_HEIGHT)) - 1.0f);
 
 
-		printf("xpoint: %f, ypoint: %finsdie mouseclick\n",xpoint, ypoint);
 
 		glutPostRedisplay();
 	}
@@ -290,7 +321,6 @@ void mouseMotion(int x, int y) {
 		GLfloat ydiff = ycord - (GLfloat)y;
 		xcord = x;
 		ycord = y;
-		printf("inside mouse motion with x: %d, y: %d\nxdiff: %f, ydiff: %f\n", x, y, xdiff, ydiff);
 		if (xdiff >= 0 && ydiff >= 0) {
 			yRotated += xdiff;
 			xRotated -= ydiff;
