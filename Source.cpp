@@ -15,6 +15,9 @@ public:
 	GLfloat xcord;
 	GLfloat ycord;
 	GLfloat zcord;
+	float rcolor = 1.0;
+	float bcolor = 0.0;
+	float gcolor = 0.0;
 };
 
 static int window; //variable that hold main window
@@ -23,8 +26,8 @@ GLdouble radius = 1.0;
 double xcord = 0;
 double ycord = 0;
 
-double xpoint = 0;
-double ypoint = 0;
+float xpoint = 0;
+float ypoint = 0;
 
 float m[16];
 float y[16];
@@ -41,6 +44,20 @@ float timevar;
 vector<Point> vec;
 
 
+
+void select(int index) {
+	for (int i = 0; i < vec.size(); i++) {
+		if (i == index) {
+			vec.at(i).gcolor = 1.0;
+			vec.at(i).rcolor = 0.0;
+		}
+		else {
+			vec.at(i).rcolor = 1.0;
+			vec.at(i).gcolor = 0.0;
+		}
+	}
+}
+
 void slerp(vector<Point> vec) {
 	if (vec.size() == 1) {
 		return;
@@ -50,7 +67,7 @@ void slerp(vector<Point> vec) {
 
 	vector<Point> tempVec;
 	for (int i = 0; i < vec.size()-1; i++) {
-		printf("size:%d", vec.size());
+		//printf("size:%d", vec.size());
 		Point p0 = vec.at(i);
 		Point p1 = vec.at(i + 1);
 
@@ -73,7 +90,7 @@ void slerp(vector<Point> vec) {
 		
 		float angle = acos(dot / (1 * 1)); //angle between two vectors
 		
-		printf("angle:%f\n", angle);
+		//printf("angle:%f\n", angle);
 
 		Point nextPoint;
 		float alpha = (sin(1 - t) * angle) / sin(angle);
@@ -86,7 +103,8 @@ void slerp(vector<Point> vec) {
 
 
 		glBegin(GL_LINE_STRIP);
-		for (float i = 0; i <= 1; i += 0.01f) {
+		glColor3f(0.0, 0.0, 1.0);
+		for (float i = 0; i <= 1; i += 0.01f) { //draw line between points
 			float alpha = sin((1 - i) * angle) / sin(angle);
 			float beta = sin(i * angle) / sin(angle);
 
@@ -157,26 +175,23 @@ void init() {
 
 }
 
-void drawCubeLocation(GLfloat xcenter, GLfloat ycenter, GLfloat size, GLfloat zpos) {
+void drawCubeLocation(GLfloat xcenter, GLfloat ycenter, GLfloat size, GLfloat zpos, float rcolor, float gcolor, float bcolor) {
 
 	glBegin(GL_POLYGON); //front face
 
-	glColor3f(1.0, 0.0, 0.0);
+	glColor3f(rcolor, bcolor, gcolor);
+
 	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
 
-	glColor3f(0.0, 1.0, 0.0);
 	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
 
-	glColor3f(0.0, 0.0, 1.0);
 	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
 
-	glColor3f(1.0, 0.0, 1.0);
 	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
 
 	glEnd();
 
 	glBegin(GL_POLYGON);//back face
-	glColor3f(1.0, 1.0, 1.0);
 	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
 	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
 	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
@@ -186,7 +201,6 @@ void drawCubeLocation(GLfloat xcenter, GLfloat ycenter, GLfloat size, GLfloat zp
 	
 
 	glBegin(GL_POLYGON); //left face
-	glColor3f(0.0, 1.0, 0.0);
 	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
 	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
 	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
@@ -194,7 +208,6 @@ void drawCubeLocation(GLfloat xcenter, GLfloat ycenter, GLfloat size, GLfloat zp
 	glEnd();
 
 	glBegin(GL_POLYGON);//right face
-	glColor3f(1.0, 0.0, 1.0);
 	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
 	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
 	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
@@ -210,7 +223,6 @@ void drawCubeLocation(GLfloat xcenter, GLfloat ycenter, GLfloat size, GLfloat zp
 	glEnd();
 
 	glBegin(GL_POLYGON);//bottom face
-	glColor3f(1.0, 0.0, 0.0);
 	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
 	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
 	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
@@ -274,8 +286,16 @@ void display() {
 		//derive from x^2 + y^2 + z^2 = r^2
 		double zval = sqrt(abs(pow(xpoint, 2) + pow(ypoint, 2) - pow(radius, 2)));
 		glGetFloatv(GL_MODELVIEW_MATRIX, m);
-		float xval = (xpoint * m[0] + ypoint * m[1] + zval * m[2]); //fix points to align with 
+		float xval = (xpoint * m[0] + ypoint * m[1] + zval * m[2]); //fix points to align with rotation
+
+		printf("yval variables before calc. xpoint: %f, ypoint: %f, zval: %f, m4: %f, m5: %f, m6: %f, yval:%f\n", xpoint, ypoint, zval, m[4], m[5], m[6], 0.0);
+
+
 		float yval = xpoint * m[4] + ypoint * m[5] + zval * m[6];
+
+		printf("yval variables after calc. xpoint: %f, ypoint: %f, zval: %f, m4: %f, m5: %f, m6: %f, yval:%f\n", xpoint, ypoint, zval, m[4], m[5], m[6], yval);
+
+
 		float zvalFinal = xpoint * m[8] + ypoint * m[9] + zval * m[10];
 		Point point;
 		point.xcord = xval;
@@ -283,6 +303,7 @@ void display() {
 		point.zcord = zvalFinal;
 		vec.push_back(point);
 		addPoint = false;
+
 	}
 
 	for (int i = 0; i < vec.size(); i++) {
@@ -292,7 +313,7 @@ void display() {
 		double tempzcord = vec.at(i).zcord;
 
 
-		drawCubeLocation(tempxcord, tempycord, 0.02, tempzcord);
+		drawCubeLocation(tempxcord, tempycord, 0.02, tempzcord, vec.at(i).rcolor, vec.at(i).bcolor, vec.at(i).gcolor);
 
 
 	}
@@ -329,8 +350,10 @@ Mouse Handler
 void mouseClick(int button, int mode, int x, int y) {
 	// event happens once on pushing the button and once more when releasing it
 	// button identifies what you clicked, mode if its down or up
-	if (button == 0 && mode == 0) {
-		//left mouse down
+	int z = glutGetModifiers();
+
+	if (button == 0 && mode == 0 && z == 0) {
+		//left mouse down no modifiers
 		xcord = x;
 		ycord = y;
 		lmbd = true;
@@ -341,21 +364,46 @@ void mouseClick(int button, int mode, int x, int y) {
 		lmbd = false;
 	}
 
-	if (button == 2 && mode == 0) {
+	if (button == 2 && mode == 0) { //rmb down
 		addPoint = true;
-
-		//TODO always = 0,0 due to int divison. figure out why real values are off.
-		//xpoint = x/(glutGet(GLUT_WINDOW_WIDTH));
-		//ypoint = y / (glutGet(GLUT_WINDOW_HEIGHT));
 
 		xpoint = 2.0f * ((GLfloat)x + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_WIDTH)) - 1.0f;
 		 ypoint = -1 * (2.0f * ((GLfloat)y + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_HEIGHT)) - 1.0f);
 
-
-
 		glutPostRedisplay();
 	}
 
+
+	if (z == 1 && button == 0 && mode == 0) { //shift Lclick down
+		//select point
+		printf("shift L click down\n");
+
+		float localx = 2.0f * ((GLfloat)x + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_WIDTH)) - 1.0f; //convert to same scale as points
+		float localy = -1 * (2.0f * ((GLfloat)y + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_HEIGHT)) - 1.0f);
+		float templocalx = localx;
+
+
+		double zval = sqrt(abs(pow(localx, 2) + pow(localy, 2) - pow(radius, 2)));
+		glGetFloatv(GL_MODELVIEW_MATRIX, m);
+		localx = (localx * m[0] + localy * m[1] + zval * m[2]); //fix points to align with rotation/align with x,y, coords as points on sphere
+
+		localy = templocalx * m[4] + localy * m[5] + zval * m[6];
+
+		float zvalFinal = xpoint * m[8] + ypoint * m[9] + zval * m[10];
+
+
+		printf("clicked AT X: %f Y: %f\n", localx, localy);
+
+		printf("localYval calc in click after calc fun. localx: %f, localy: %f, zval: %f, m4: %f, m5: %f, m6: %f\n",localx, localy, zval, m[4], m[5], m[6]);
+
+		for (int i = 0; i < vec.size(); i++) {
+			printf("current vec xcord: %f current vec ycord: %f\n", vec.at(i).xcord, vec.at(i).ycord);
+			if ((abs(vec.at(i).xcord - localx) < 0.05) && (abs(vec.at(i).ycord - localy) < 0.05)) { //find first point that is within the tolerance. change its color
+				select(i);
+				break;
+			}
+		}
+	}
 
 	//printf("Xrotated:   %f,  Yrotated   %f", xRotated, yRotated);
 	return;
