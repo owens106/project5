@@ -287,14 +287,7 @@ void display() {
 		double zval = sqrt(abs(pow(xpoint, 2) + pow(ypoint, 2) - pow(radius, 2)));
 		glGetFloatv(GL_MODELVIEW_MATRIX, m);
 		float xval = (xpoint * m[0] + ypoint * m[1] + zval * m[2]); //fix points to align with rotation
-
-		printf("yval variables before calc. xpoint: %f, ypoint: %f, zval: %f, m4: %f, m5: %f, m6: %f, yval:%f\n", xpoint, ypoint, zval, m[4], m[5], m[6], 0.0);
-
-
 		float yval = xpoint * m[4] + ypoint * m[5] + zval * m[6];
-
-		printf("yval variables after calc. xpoint: %f, ypoint: %f, zval: %f, m4: %f, m5: %f, m6: %f, yval:%f\n", xpoint, ypoint, zval, m[4], m[5], m[6], yval);
-
 
 		float zvalFinal = xpoint * m[8] + ypoint * m[9] + zval * m[10];
 		Point point;
@@ -376,8 +369,7 @@ void mouseClick(int button, int mode, int x, int y) {
 
 	if (z == 1 && button == 0 && mode == 0) { //shift Lclick down
 		//select point
-		printf("shift L click down\n");
-
+		lmbd = true;
 		float localx = 2.0f * ((GLfloat)x + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_WIDTH)) - 1.0f; //convert to same scale as points
 		float localy = -1 * (2.0f * ((GLfloat)y + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_HEIGHT)) - 1.0f);
 		float templocalx = localx;
@@ -389,15 +381,12 @@ void mouseClick(int button, int mode, int x, int y) {
 
 		localy = templocalx * m[4] + localy * m[5] + zval * m[6];
 
-		float zvalFinal = xpoint * m[8] + ypoint * m[9] + zval * m[10];
+		//float zvalFinal = xpoint * m[8] + ypoint * m[9] + zval * m[10];
 
 
-		printf("clicked AT X: %f Y: %f\n", localx, localy);
 
-		printf("localYval calc in click after calc fun. localx: %f, localy: %f, zval: %f, m4: %f, m5: %f, m6: %f\n",localx, localy, zval, m[4], m[5], m[6]);
 
 		for (int i = 0; i < vec.size(); i++) {
-			printf("current vec xcord: %f current vec ycord: %f\n", vec.at(i).xcord, vec.at(i).ycord);
 			if ((abs(vec.at(i).xcord - localx) < 0.05) && (abs(vec.at(i).ycord - localy) < 0.05)) { //find first point that is within the tolerance. change its color
 				select(i);
 				break;
@@ -412,7 +401,9 @@ void mouseMotion(int x, int y) {
 	// called when the mouse moves
 	// active motion means a button is down
 	//printf("mouse down at pos: %d , %d\n", x, y);
-	if (lmbd) {
+	int z = glutGetModifiers();
+
+	if (lmbd && z == 0) {
 		GLfloat xdiff = xcord - (GLfloat)x;
 		GLfloat ydiff = ycord - (GLfloat)y;
 		xcord = x;
@@ -432,11 +423,42 @@ void mouseMotion(int x, int y) {
 		else if (xdiff <= 0 && ydiff <= 0) {
 			yRotated += xdiff;
 			xRotated += ydiff;
+		}	
+	} //end if
+
+	if (z == 1 && lmbd) { //shift being held with left mouse
+		//start shifting the selected point;
+		printf("inside shift movement\n");
+		int index = -1;
+		for (int i = 0; i < vec.size(); i++) {
+			if (vec.at(i).gcolor == 1.0) { //selected point
+				index = i;
+			}
+		}//end for
+		if (index == -1) { //no point found
+			printf("no selected point!\n");
+			return;
 		}
-		display();
-		return;
+		float localx = 2.0f * ((GLfloat)x + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_WIDTH)) - 1.0f; //convert to same scale as points
+		float localy = -1 * (2.0f * ((GLfloat)y + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_HEIGHT)) - 1.0f);
+		float templocalx = localx;
+
+
+		double zval = sqrt(abs(pow(localx, 2) + pow(localy, 2) - pow(radius, 2)));
+		glGetFloatv(GL_MODELVIEW_MATRIX, m);
+		localx = (localx * m[0] + localy * m[1] + zval * m[2]); //fix points to align with rotation/align with x,y, coords as points on sphere
+
+		localy = templocalx * m[4] + localy * m[5] + zval * m[6];
+
+		vec.at(index).xcord = localx;
+		vec.at(index).ycord = localy;
+		
+
 	}
-}
+	glutPostRedisplay();
+
+
+}//end mouse move
 void resize(int width, int height) {
 	//this is called on window resize
 	//params are window width and window height
