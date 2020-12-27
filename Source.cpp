@@ -1,20 +1,24 @@
 /*
 	Project Assignment2
 */
+#define _CRT_SECURE_NO_WARNINGS
 
 #include "glut.h"
 #include <iostream>
 #include <stdio.h>
 #include <vector>
+#include "glui.h"
+#include <string>
+
 
 using namespace std;
 # define PI		3.14159265358979323846
 
 class Point {
 public:
-	GLfloat xcord;
-	GLfloat ycord;
-	GLfloat zcord;
+	GLfloat xcord = 0;
+	GLfloat ycord = 0;
+	GLfloat zcord = 0;
 	float rcolor = 1.0;
 	float bcolor = 0.0;
 	float gcolor = 0.0;
@@ -39,11 +43,71 @@ float globalAngle = 0;
 Point globalP0;
 Point globalP1;
 
-float timevar;
+float timevar= 0.26f;
+
+int wireframe;
+int segments;
+int mainWindow;
 
 vector<Point> vec;
 
 
+void drawCubeLocation(GLfloat xcenter, GLfloat ycenter, GLfloat size, GLfloat zpos, float rcolor, float gcolor, float bcolor) {
+
+	glBegin(GL_POLYGON); //front face
+
+	glColor3f(rcolor, bcolor, gcolor);
+
+	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
+
+	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
+
+	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
+
+	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
+
+	glEnd();
+
+	glBegin(GL_POLYGON);//back face
+	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
+	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
+	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
+	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
+	glEnd();
+
+
+
+	glBegin(GL_POLYGON); //left face
+	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
+	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
+	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
+	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
+	glEnd();
+
+	glBegin(GL_POLYGON);//right face
+	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
+	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
+	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
+	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
+	glEnd();
+
+	glBegin(GL_POLYGON);//top face
+	glColor3f(0.0, 0.0, 1.0);
+	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
+	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
+	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
+	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
+	glEnd();
+
+	glBegin(GL_POLYGON);//bottom face
+	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
+	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
+	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
+	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
+	glEnd();
+
+	glFlush();
+}
 
 void select(int index) {
 	for (int i = 0; i < vec.size(); i++) {
@@ -60,11 +124,15 @@ void select(int index) {
 
 void slerp(vector<Point> vec) {
 	if (vec.size() == 1) {
+		glFlush();
 		return;
 	}
 
-	float t = 0.266;
-
+	float t = timevar;
+	float cubex;
+	float cubey;
+	float cubez;
+	BOOLEAN drawCube = false;
 	vector<Point> tempVec;
 	for (int i = 0; i < vec.size()-1; i++) {
 		//printf("size:%d", vec.size());
@@ -102,8 +170,8 @@ void slerp(vector<Point> vec) {
 		globalAngle = angle;
 
 
-		glBegin(GL_LINE_STRIP);
-		glColor3f(0.0, 0.0, 1.0);
+		//glBegin(GL_LINE_STRIP);
+		glColor3f(0.5, 0.0, 1.0);
 		for (float i = 0; i <= 1; i += 0.01f) { //draw line between points
 			float alpha = sin((1 - i) * angle) / sin(angle);
 			float beta = sin(i * angle) / sin(angle);
@@ -113,19 +181,20 @@ void slerp(vector<Point> vec) {
 
 			//printf("testing: %f : %f : %f\n", y[0], y[1],y[2]);
 
+			
 
-			/*fixedP0xcord = globalP0.xcord * m[0] + globalP0.ycord * m[1] + globalP0.zcord * y[2];
-			fixedP0ycord = globalP0.xcord * m[4] + globalP0.ycord * m[5] + globalP0.zcord * m[6];
-			fixedP0zcord = globalP0.xcord * m[8] + globalP0.ycord * m[9] + globalP0.zcord * m[10];
+			fixedP0xcord = p0.xcord * m[0] + p0.ycord * m[1] + p0.zcord * y[2];
+			fixedP0ycord = p0.xcord * m[4] + p0.ycord * m[5] + p0.zcord * m[6];
+			fixedP0zcord = p0.xcord * m[8] + p0.ycord * m[9] + p0.zcord * m[10];
 
-			fixedP1xcord = globalP1.xcord * m[0] + globalP1.ycord * m[1] + globalP1.zcord * m[2];
-			fixedP1ycord = globalP1.xcord * m[4] + globalP1.ycord * m[5] + globalP1.zcord * m[6];
-			fixedP1zcord = globalP1.xcord * m[8] + globalP1.ycord * m[9] + globalP1.zcord * m[10];
+			fixedP1xcord = p1.xcord * m[0] + p1.ycord * m[1] + p1.zcord * m[2];
+			fixedP1ycord = p1.xcord * m[4] + p1.ycord * m[5] + p1.zcord * m[6];
+			fixedP1zcord = p1.xcord * m[8] + p1.ycord * m[9] + p1.zcord * m[10];
 
 			float xcordDraw = alpha * fixedP0xcord + beta * fixedP1xcord;
 			float ycordDraw = alpha * fixedP0ycord + beta * fixedP1ycord;
 			float zcordDraw = alpha * fixedP0zcord + beta * fixedP1zcord;
-			*/
+			
 
 			//printf("xcord: %f, ycord: %f, z cord:%f\n", xcordDraw, ycordDraw, zcordDraw);
 			
@@ -136,21 +205,46 @@ void slerp(vector<Point> vec) {
 			//printf("xcord: %f, ycord: %f, z cord: %f\n", xcord, ycord, zcord);
 			
 
-			/*glGetFloatv(GL_MODELVIEW_MATRIX, m);
+			glGetFloatv(GL_MODELVIEW_MATRIX, m);
+			float tempxcord = xcord;
+			float tempycord = ycord;
+			float tempzcord = zcord;
 
-			 xcord = (xcord * m[0] + ycord * m[1] + zcord * m[2]);
-			 ycord = xcord * m[4] + ycord * m[5] + zcord * m[6];
-			 zcord = xcord * m[8] + ycord * m[9] + zcord * m[10];
+			//printf("timeVar: %f. ival: %f\n", timevar, i);
+			
+			// tempxcord = (xcord * m[0] + ycord * m[1] + zcord * m[2]);
+			// tempycord = xcord * m[4] + ycord * m[5] + zcord * m[6];
+			// tempzcord = xcord * m[8] + ycord * m[9] + zcord * m[10];
 			// printf("xcord: %f, ycord: %f, z cord: %f\n", xcord, ycord, zcord);
-			 printf("testing123: %f: %f: %f\n", m[0], m[1], m[2]);
-			 printf("testing123: %f: %f: %f\n", y[0], y[1], y[2]);
-			 */
+			 
+
+			// tempxcord = xcordDraw* m[0] + ycordDraw * m[1] + zcordDraw * m[2];
+			// tempycord = xcordDraw * m[4] + ycordDraw * m[5] + zcordDraw * m[6];
+			 //tempzcord = xcordDraw * m[8] + ycordDraw * m[9] + zcordDraw * m[10];
+			 
 
 			//glVertex3f(xcordDraw, ycordDraw, zcordDraw);
 
-			glVertex3f(xcord, ycord, zcord);
+			glVertex3f(tempxcord, tempycord, tempzcord);
+
+			if (vec.size() == 2 && ::vec.size()>2) {
+				if (abs(i - timevar) <= 0.0001) {
+					//point to "save"
+					cubex = tempxcord;
+					cubey = tempycord;
+					cubez = tempzcord;
+					drawCube = true;
+				}
+			}
+
 		}
-		glEnd();
+		//glEnd();
+
+		//store xyz for cube draw
+		if (drawCube) {
+			drawCubeLocation(cubex, cubey, 0.01, cubez, 1.0, 1.0, 0.0);
+			drawCube = false;
+		}
 		
 	}
 
@@ -175,62 +269,6 @@ void init() {
 
 }
 
-void drawCubeLocation(GLfloat xcenter, GLfloat ycenter, GLfloat size, GLfloat zpos, float rcolor, float gcolor, float bcolor) {
-
-	glBegin(GL_POLYGON); //front face
-
-	glColor3f(rcolor, bcolor, gcolor);
-
-	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
-
-	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
-
-	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
-
-	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
-
-	glEnd();
-
-	glBegin(GL_POLYGON);//back face
-	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
-	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
-	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
-	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
-	glEnd();
-
-	
-
-	glBegin(GL_POLYGON); //left face
-	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
-	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
-	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
-	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
-	glEnd();
-
-	glBegin(GL_POLYGON);//right face
-	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
-	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
-	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
-	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
-	glEnd();
-
-	glBegin(GL_POLYGON);//top face
-	glColor3f(0.0, 0.0, 1.0);
-	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
-	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
-	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
-	glVertex3f(xcenter - size, ycenter + size, zpos - size); //top left
-	glEnd();
-
-	glBegin(GL_POLYGON);//bottom face
-	glVertex3f(xcenter + size, ycenter - size, zpos - size); //bottom right
-	glVertex3f(xcenter - size, ycenter - size, zpos - size); //bottom left
-	glVertex3f(xcenter - size, ycenter - size, zpos + size); //bottom left
-	glVertex3f(xcenter + size, ycenter - size, zpos + size); //bottom right
-	glEnd();
-
-	glFlush();
-}
 
 
 void reshape(int x, int y)
@@ -311,9 +349,11 @@ void display() {
 
 	}
 	
-	if (vec.size() > 1) {			
-		slerp(vec);
-			
+	if (vec.size() > 1) {	
+		for (float i = 0.0; i <= 1.0; i += 0.01) {
+			timevar = i; //TOGGLE FOR INTERMEDIATE INTERPOLATIONS
+			slerp(vec);
+		}
 	}
 	
 
@@ -331,6 +371,11 @@ void keyboard(unsigned char k, int x, int y)
 	if (k == 27)
 	{
 		exit(0);
+	};
+	printf("char pressed: %u\n", k);
+	if (k == 9) {
+		//tab pushed
+		//toggle real line and intermediate interpolations
 	}
 }
 
@@ -465,6 +510,18 @@ void resize(int width, int height) {
 }
 
 
+void myGlutIdle(void)
+{
+	 /*According to the GLUT specification, the current window is
+	   undefined during an idle callback.  So we need to explicitly change
+	   it if necessary */
+	if (glutGetWindow() != mainWindow)
+		glutSetWindow(mainWindow);
+
+	glutPostRedisplay();
+}
+
+
 
 
 /*
@@ -474,7 +531,7 @@ int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
 	glutInitWindowSize(480, 480);
-	glutCreateWindow("Solid Sphere");
+	mainWindow = glutCreateWindow("Solid Sphere");
 	zRotated = 30.0;
 	xRotated = 0;
 	yRotated = 0;
@@ -485,7 +542,31 @@ int main(int argc, char** argv)
 	glutReshapeFunc(reshape);
 	glutMouseFunc(mouseClick);
 	glutMotionFunc(mouseMotion);
+	glutKeyboardFunc(keyboard);
 	init();
+
+	string gluitxt = "GLUI";
+	string gluitxtwire = "wireframe";
+	string gluitxtseg = "segments";
+
+	char* main = &gluitxt[0];;
+	char* wire = &gluitxtwire[0];
+	char* seg = &gluitxtseg[0];
+
+
+
+	/*
+	GLUI* glui = GLUI_Master.create_glui(main);
+	glui->add_checkbox(wire, &wireframe);
+	GLUI_Spinner* segment_spinner =
+		glui->add_spinner(seg, GLUI_SPINNER_INT, &segments);
+	segment_spinner->set_int_limits(3, 60);
+
+	glui->set_main_gfx_window(mainWindow);
+	*/
+	/* We register the idle callback with GLUI, *not* with GLUT */
+	//GLUI_Master.set_glutIdleFunc(myGlutIdle);
+	
 	glutMainLoop();
 	return 0;
 }

@@ -144,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\Desktop\proj4\freeglutd.dll" />
+    <None Include="..\..\..\Downloads\glut32.dll" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="freeglut_ext.h" />
     <ClInclude Include="freeglut.h" />
     <ClInclude Include="eglew.h" />
+    <ClInclude Include="glui.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,11 +15,20 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\..\Desktop\proj4\freeglut.lib" />
-    <Library Include="..\..\..\Desktop\proj4\freeglutd.lib" />
+    <Library Include="..\..\..\Desktop\proj4\freeglut.lib">
+      <Filter>Source Files</Filter>
+    </Library>
+    <Library Include="..\..\..\Desktop\proj4\freeglutd.lib">
+      <Filter>Source Files</Filter>
+    </Library>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\Desktop\proj4\freeglutd.dll" />
+    <None Include="..\..\..\Downloads\glut32.dll">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\Desktop\proj4\freeglutd.dll">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -43,6 +52,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="eglew.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
