@@ -512,8 +512,12 @@ void mouseMotion(int x, int y) {
 
 		localy = templocalx * m[4] + localy * m[5] + zval * m[6];
 
+		float zvalFinal = localx * m[8] + localy * m[9] + zval * m[10];
+
+
 		vec.at(index).xcord = localx;
 		vec.at(index).ycord = localy;
+		vec.at(index).zcord = zvalFinal;
 		
 
 	}
