@@ -34,7 +34,6 @@ float xpoint = 0;
 float ypoint = 0;
 
 float m[16];
-float y[16];
 
 BOOLEAN addPoint = false;
 BOOLEAN lmbd = false;
@@ -166,13 +165,26 @@ void slerp(vector<Point> vec) {
 		nextPoint.xcord = alpha * p0.xcord + beta * p1.xcord;
 		nextPoint.ycord = alpha * p0.ycord + beta * p1.ycord;
 		nextPoint.zcord = alpha * p0.zcord + beta * p0.zcord;
+
+		float tempxcord = nextPoint.xcord;
+		float tempycord = nextPoint.ycord;
+		float tempzcord = nextPoint.zcord;
+
+
+		//adjust rotation for next vector
+		 //nextPoint.xcord = tempxcord* m[0] + tempycord * m[1] + tempzcord * m[2];
+		// nextPoint.ycord = tempxcord * m[4] + tempycord * m[5] + tempzcord * m[6];
+		// nextPoint.zcord = tempxcord * m[8] + tempycord * m[9] + tempzcord * m[10];
+
 		tempVec.push_back(nextPoint);
+
+
 		globalAngle = angle;
 
 
 		//glBegin(GL_LINE_STRIP);
 		glColor3f(0.5, 0.0, 1.0);
-		for (float i = 0; i <= 1; i += 0.01f) { //draw line between points
+		for (float i = 0; i <= 1; i += 0.05f) { //draw line between points
 			float alpha = sin((1 - i) * angle) / sin(angle);
 			float beta = sin(i * angle) / sin(angle);
 
@@ -182,8 +194,8 @@ void slerp(vector<Point> vec) {
 			//printf("testing: %f : %f : %f\n", y[0], y[1],y[2]);
 
 			
-
-			fixedP0xcord = p0.xcord * m[0] + p0.ycord * m[1] + p0.zcord * y[2];
+			//adjust rotation of current vector points
+			fixedP0xcord = p0.xcord * m[0] + p0.ycord * m[1] + p0.zcord * m[2];
 			fixedP0ycord = p0.xcord * m[4] + p0.ycord * m[5] + p0.zcord * m[6];
 			fixedP0zcord = p0.xcord * m[8] + p0.ycord * m[9] + p0.zcord * m[10];
 
@@ -218,21 +230,26 @@ void slerp(vector<Point> vec) {
 			// printf("xcord: %f, ycord: %f, z cord: %f\n", xcord, ycord, zcord);
 			 
 
-			// tempxcord = xcordDraw* m[0] + ycordDraw * m[1] + zcordDraw * m[2];
+			// tempxcord = xcordDraw * m[0] + ycordDraw * m[1] + zcordDraw * m[2];
 			// tempycord = xcordDraw * m[4] + ycordDraw * m[5] + zcordDraw * m[6];
 			 //tempzcord = xcordDraw * m[8] + ycordDraw * m[9] + zcordDraw * m[10];
 			 
 
-			//glVertex3f(xcordDraw, ycordDraw, zcordDraw);
+			 //glVertex3f(xcordDraw, ycordDraw, zcordDraw);
 
 			glVertex3f(tempxcord, tempycord, tempzcord);
 
 			if (vec.size() == 2 && ::vec.size()>2) {
-				if (abs(i - timevar) <= 0.0001) {
+				if (abs(i - timevar) <= 0.005) {
 					//point to "save"
 					cubex = tempxcord;
 					cubey = tempycord;
 					cubez = tempzcord;
+
+					//cubex = xcordDraw;
+					//cubey = ycordDraw;
+					//cubez = zcordDraw;
+
 					drawCube = true;
 				}
 			}
