@@ -14,6 +14,36 @@
 using namespace std;
 # define PI		3.14159265358979323846
 
+
+
+//GLUI VARS
+GLUI_Spinner* segment_spinner;
+GLUI_Listbox* listbox;
+
+GLUI_Checkbox* controlPolyCheckbox;
+int controlPolyCheckboxBool;
+
+GLUI_Checkbox* DeCastelijauCheckbox;
+int DeCastelijauCheckboxBool;
+
+GLUI_Checkbox* CurveCheckbox;
+int CurveCheckboxBool;
+
+GLUI_Checkbox* ftCheckbox;
+int ftCheckboxBool;
+
+GLUI_Checkbox* gridCheckbox;
+int gridCheckboxBool;
+
+GLUI_Checkbox* wirespherePolyCheckbox;
+int wirespherePolyCheckboxBool;
+
+GLUI_Checkbox* ctrlPointsToggleCheckbox;
+int ctrlPointsToggleCheckboxBool;
+
+GLUI_Checkbox* ticksCheckbox;
+int ticksCheckboxBool;
+
 class Point {
 public:
 	GLfloat xcord = 0;
@@ -24,7 +54,7 @@ public:
 	float gcolor = 0.0;
 };
 
-static int window; //variable that hold main window
+int  main_window;; //variable that hold main window
 GLfloat xRotated, yRotated, zRotated;
 GLdouble radius = 1.0;
 double xcord = 0;
@@ -46,7 +76,6 @@ float timevar= 0.26f;
 
 int wireframe;
 int segments;
-int mainWindow;
 
 vector<Point> vec;
 
@@ -137,6 +166,8 @@ void slerp(vector<Point> vec) {
 		//printf("size:%d", vec.size());
 		Point p0 = vec.at(i);
 		Point p1 = vec.at(i + 1);
+
+		
 
 		float len0 = sqrt((pow(p0.xcord, 2)) + (pow(p0.ycord, 2)) + (pow(p0.zcord, 2))); //magnitube
 		float len1 = sqrt((pow(p1.xcord, 2)) + (pow(p1.ycord, 2)) + (pow(p1.zcord, 2)));
@@ -335,7 +366,34 @@ void display() {
 	// built-in (glut library) function , draw you a sphere.
 	glColor3f(1.0, 1.0, 0.0);
 
-	glutWireSphere(radius, 20, 20);
+
+	if (controlPolyCheckboxBool) {
+		//draw sphere
+		if (wirespherePolyCheckboxBool && gridCheckboxBool) {
+			//wire and grid = only wire
+			glutWireSphere(radius, 20, 20);
+		}
+		else if (!wirespherePolyCheckboxBool && gridCheckboxBool) {
+			//solid sphere + grid
+			glutSolidSphere(radius, 20, 20);
+
+			glColor3f(0.0, 0.0, 1.0);//blue grid
+			glutWireSphere(radius + 0.01, 20, 20);
+		}
+		else if (!gridCheckboxBool && wirespherePolyCheckboxBool) {
+			glutWireSphere(radius, 20, 20);
+		}
+		else {
+			glutSolidSphere(radius, 20, 20);
+			//solid sphere no grid
+		}
+	}
+	glFlush();
+	//use combo of solid + slightly bigger wire sphere to map "grid" to sphere
+
+	//glColor3f(0.0, 0.0, 1.0);
+	//glutSolidSphere(radius, 20, 20);
+
 	// Flush buffers to screen
 	if (addPoint) {
 		//derive from x^2 + y^2 + z^2 = r^2
@@ -536,10 +594,10 @@ void myGlutIdle(void)
 	 /*According to the GLUT specification, the current window is
 	   undefined during an idle callback.  So we need to explicitly change
 	   it if necessary */
-	if (glutGetWindow() != mainWindow)
-		glutSetWindow(mainWindow);
+	if (glutGetWindow() != main_window)
+		glutSetWindow(main_window);
 
-	glutPostRedisplay();
+	//glutPostRedisplay();
 }
 
 
@@ -552,7 +610,7 @@ int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
 	glutInitWindowSize(480, 480);
-	mainWindow = glutCreateWindow("Solid Sphere");
+	main_window = glutCreateWindow("Solid Sphere");
 	zRotated = 30.0;
 	xRotated = 0;
 	yRotated = 0;
@@ -566,28 +624,28 @@ int main(int argc, char** argv)
 	glutKeyboardFunc(keyboard);
 	init();
 
-	string gluitxt = "GLUI";
-	string gluitxtwire = "wireframe";
-	string gluitxtseg = "segments";
-
-	char* main = &gluitxt[0];;
-	char* wire = &gluitxtwire[0];
-	char* seg = &gluitxtseg[0];
-
-
-
-	/*
-	GLUI* glui = GLUI_Master.create_glui(main);
-	glui->add_checkbox(wire, &wireframe);
-	GLUI_Spinner* segment_spinner =
-		glui->add_spinner(seg, GLUI_SPINNER_INT, &segments);
-	segment_spinner->set_int_limits(3, 60);
-
-	glui->set_main_gfx_window(mainWindow);
-	*/
-	/* We register the idle callback with GLUI, *not* with GLUT */
-	//GLUI_Master.set_glutIdleFunc(myGlutIdle);
 	
+
+	GLUI* glui = GLUI_Master.create_glui("GLUI", 0, 400, 400);
+	glui->set_main_gfx_window(main_window);
+
+
+	glui->add_separator();
+	glui->add_statictext("Basic SLERP Bezier");
+	glui->add_separator();
+
+	GLUI_Panel* displayPanel = glui->add_panel("Display");
+	controlPolyCheckbox = glui->add_checkbox("Control Polygon", &controlPolyCheckboxBool);
+	DeCastelijauCheckbox = glui->add_checkbox("DeCastelijau", &DeCastelijauCheckboxBool);
+	CurveCheckbox = glui->add_checkbox("Curve", &CurveCheckboxBool);
+	ftCheckbox = glui->add_checkbox("show F(t)", &ftCheckboxBool);
+	gridCheckbox = glui->add_checkbox("show Grid", &gridCheckboxBool);
+	wirespherePolyCheckbox = glui->add_checkbox("Wire Sphere", &wirespherePolyCheckboxBool);
+	ctrlPointsToggleCheckbox = glui->add_checkbox("show no Control Points", &ctrlPointsToggleCheckboxBool);
+	ticksCheckbox = glui->add_checkbox("show Ticks", &ticksCheckboxBool);
+
+	GLUI_Master.set_glutIdleFunc(myGlutIdle);
+
 	glutMainLoop();
 	return 0;
 }

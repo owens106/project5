@@ -120,6 +120,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glui_staticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -136,16 +137,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glui_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <Library Include="..\..\..\Desktop\proj4\freeglut.lib" />
-    <Library Include="..\..\..\Desktop\proj4\freeglutd.lib" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\Desktop\proj4\freeglutd.dll" />
-    <None Include="..\..\..\Downloads\glut32.dll" />
-  </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
@@ -157,6 +151,16 @@
     <ClInclude Include="freeglut.h" />
     <ClInclude Include="eglew.h" />
     <ClInclude Include="glui.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.dll" />
+    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.ilk" />
+    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.pdb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.lib" />
+    <Library Include="..\..\..\Desktop\freshglui\glui_etc\glui_static.lib" />
+    <Library Include="..\..\..\Desktop\freshglui\glui_etc\glui_staticd.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

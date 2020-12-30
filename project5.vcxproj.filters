@@ -15,22 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\..\Desktop\proj4\freeglut.lib">
-      <Filter>Source Files</Filter>
-    </Library>
-    <Library Include="..\..\..\Desktop\proj4\freeglutd.lib">
-      <Filter>Source Files</Filter>
-    </Library>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\Downloads\glut32.dll">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\..\..\Desktop\proj4\freeglutd.dll">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -57,5 +41,27 @@
     <ClInclude Include="glui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.dll">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.ilk">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.pdb">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.lib">
+      <Filter>Source Files</Filter>
+    </Library>
+    <Library Include="..\..\..\Desktop\freshglui\glui_etc\glui_static.lib">
+      <Filter>Source Files</Filter>
+    </Library>
+    <Library Include="..\..\..\Desktop\freshglui\glui_etc\glui_staticd.lib">
+      <Filter>Source Files</Filter>
+    </Library>
   </ItemGroup>
 </Project>
