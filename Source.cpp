@@ -73,6 +73,7 @@ Point globalP0;
 Point globalP1;
 
 float timevar= 0.26f;
+float tVar;
 
 int wireframe;
 int segments;
@@ -212,9 +213,11 @@ void slerp(vector<Point> vec) {
 
 		globalAngle = angle;
 
-
-		//glBegin(GL_LINE_STRIP);
-		glColor3f(0.5, 0.0, 1.0);
+		if (DeCastelijauCheckboxBool) {
+			glBegin(GL_LINE_STRIP);
+			t = tVar;
+		}
+		glColor3f(0.0, 1.0, 0.0);
 		for (float i = 0; i <= 1; i += 0.05f) { //draw line between points
 			float alpha = sin((1 - i) * angle) / sin(angle);
 			float beta = sin(i * angle) / sin(angle);
@@ -222,57 +225,25 @@ void slerp(vector<Point> vec) {
 			float fixedP0xcord, fixedP0ycord, fixedP0zcord, fixedP1xcord, fixedP1ycord, fixedP1zcord;
 			glGetFloatv(GL_MODELVIEW_MATRIX, m);
 
-			//printf("testing: %f : %f : %f\n", y[0], y[1],y[2]);
-
-			
-			//adjust rotation of current vector points
-			fixedP0xcord = p0.xcord * m[0] + p0.ycord * m[1] + p0.zcord * m[2];
-			fixedP0ycord = p0.xcord * m[4] + p0.ycord * m[5] + p0.zcord * m[6];
-			fixedP0zcord = p0.xcord * m[8] + p0.ycord * m[9] + p0.zcord * m[10];
-
-			fixedP1xcord = p1.xcord * m[0] + p1.ycord * m[1] + p1.zcord * m[2];
-			fixedP1ycord = p1.xcord * m[4] + p1.ycord * m[5] + p1.zcord * m[6];
-			fixedP1zcord = p1.xcord * m[8] + p1.ycord * m[9] + p1.zcord * m[10];
-
-			float xcordDraw = alpha * fixedP0xcord + beta * fixedP1xcord;
-			float ycordDraw = alpha * fixedP0ycord + beta * fixedP1ycord;
-			float zcordDraw = alpha * fixedP0zcord + beta * fixedP1zcord;
-			
-
-			//printf("xcord: %f, ycord: %f, z cord:%f\n", xcordDraw, ycordDraw, zcordDraw);
-			
+		
 
 			float xcord = alpha * p0.xcord + beta * p1.xcord;
 			float ycord = alpha * p0.ycord + beta * p1.ycord;
 			float zcord = alpha * p0.zcord + beta * p1.zcord;
-			//printf("xcord: %f, ycord: %f, z cord: %f\n", xcord, ycord, zcord);
 			
 
 			glGetFloatv(GL_MODELVIEW_MATRIX, m);
 			float tempxcord = xcord;
 			float tempycord = ycord;
 			float tempzcord = zcord;
-
-			//printf("timeVar: %f. ival: %f\n", timevar, i);
-			
-			// tempxcord = (xcord * m[0] + ycord * m[1] + zcord * m[2]);
-			// tempycord = xcord * m[4] + ycord * m[5] + zcord * m[6];
-			// tempzcord = xcord * m[8] + ycord * m[9] + zcord * m[10];
-			// printf("xcord: %f, ycord: %f, z cord: %f\n", xcord, ycord, zcord);
-			 
-
-			// tempxcord = xcordDraw * m[0] + ycordDraw * m[1] + zcordDraw * m[2];
-			// tempycord = xcordDraw * m[4] + ycordDraw * m[5] + zcordDraw * m[6];
-			 //tempzcord = xcordDraw * m[8] + ycordDraw * m[9] + zcordDraw * m[10];
-			 
-
-			 //glVertex3f(xcordDraw, ycordDraw, zcordDraw);
-
-			glVertex3f(tempxcord, tempycord, tempzcord);
-
+			//if (abs(i - t) <= 0.01) {
+				//only draw DeCastelijau line at set T
+				glVertex3f(tempxcord, tempycord, tempzcord);
+			//}
 			if (vec.size() == 2 && ::vec.size()>2) {
 				if (abs(i - timevar) <= 0.005) {
 					//point to "save"
+					//this is bezier curve
 					cubex = tempxcord;
 					cubey = tempycord;
 					cubez = tempzcord;
@@ -286,8 +257,10 @@ void slerp(vector<Point> vec) {
 			}
 
 		}
-		//glEnd();
+		if (DeCastelijauCheckboxBool) {
+			glEnd();
 
+		}
 		//store xyz for cube draw
 		if (drawCube) {
 			drawCubeLocation(cubex, cubey, 0.01, cubez, 1.0, 1.0, 0.0);
@@ -425,8 +398,13 @@ void display() {
 	}
 	
 	if (vec.size() > 1) {	
-		for (float i = 0.0; i <= 1.0; i += 0.01) {
-			timevar = i; //TOGGLE FOR INTERMEDIATE INTERPOLATIONS
+		if (CurveCheckboxBool) {
+			for (float i = 0.0; i <= 1.0; i += 0.01) {
+				timevar = i; //TOGGLE FOR INTERMEDIATE INTERPOLATIONS
+				slerp(vec);
+			}
+		}
+		else {
 			slerp(vec);
 		}
 	}
@@ -643,6 +621,11 @@ int main(int argc, char** argv)
 	wirespherePolyCheckbox = glui->add_checkbox("Wire Sphere", &wirespherePolyCheckboxBool);
 	ctrlPointsToggleCheckbox = glui->add_checkbox("show no Control Points", &ctrlPointsToggleCheckboxBool);
 	ticksCheckbox = glui->add_checkbox("show Ticks", &ticksCheckboxBool);
+
+	glui->add_separator();
+	GLUI_Panel* functionPanel = glui->add_panel("Function Panel");
+	segment_spinner = glui->add_spinner("T Val",GLUI_SPINNER_FLOAT, &tVar);
+	segment_spinner->set_float_limits(0.0, 1.0);
 
 	GLUI_Master.set_glutIdleFunc(myGlutIdle);
 
