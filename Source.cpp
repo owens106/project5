@@ -161,10 +161,10 @@ void slerp(vector<Point> vec) {
 	float cubey;
 	float cubez;
 	BOOLEAN drawCube = false;
+	BOOLEAN specialColor = false;
 
 	vector<Point> tempVec;
 	for (int i = 0; i < vec.size() - 1; i++) {
-		printf("size:%d", vec.size());
 		Point p0 = vec.at(i);
 		Point p1 = vec.at(i + 1);
 
@@ -227,6 +227,11 @@ void slerp(vector<Point> vec) {
 						cubey = ycord;
 						cubez = zcord;
 
+						if (ftCheckboxBool && (abs(t-tVar)<0.01)) {
+							//draw in other color!
+							specialColor = true;
+						}
+
 						//cubex = xcordDraw;
 						//cubey = ycordDraw;
 						//cubez = zcordDraw;
@@ -245,7 +250,13 @@ void slerp(vector<Point> vec) {
 
 		//store xyz for cube draw
 		if (drawCube) {
-			drawCubeLocation(cubex, cubey, 0.01, cubez, 1.0, 1.0, 0.0);
+			if (specialColor) {
+				drawCubeLocation(cubex, cubey, 0.02, cubez, 1.0, 1.0, 1.0);
+				specialColor = false;
+			}
+			else {
+				drawCubeLocation(cubex, cubey, 0.01, cubez, 1.0, 1.0, 0.0);
+			}
 			drawCube = false;
 		}
 
@@ -372,9 +383,10 @@ void display() {
 		double tempycord = vec.at(i).ycord;
 		double tempzcord = vec.at(i).zcord;
 
-
-		drawCubeLocation(tempxcord, tempycord, 0.02, tempzcord, vec.at(i).rcolor, vec.at(i).bcolor, vec.at(i).gcolor);
-
+		if (!ctrlPointsToggleCheckboxBool) {
+			//only draw if checkbox is NOT checked
+			drawCubeLocation(tempxcord, tempycord, 0.02, tempzcord, vec.at(i).rcolor, vec.at(i).bcolor, vec.at(i).gcolor);
+		}
 
 	}
 	
