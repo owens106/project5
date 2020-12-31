@@ -73,7 +73,7 @@ Point globalP0;
 Point globalP1;
 
 float timevar= 0.26f;
-float tVar;
+float tVar = 0.26;
 
 int wireframe;
 int segments;
@@ -153,7 +153,6 @@ void select(int index) {
 
 void slerp(vector<Point> vec) {
 	if (vec.size() == 1) {
-		glFlush();
 		return;
 	}
 
@@ -162,19 +161,18 @@ void slerp(vector<Point> vec) {
 	float cubey;
 	float cubez;
 	BOOLEAN drawCube = false;
+
 	vector<Point> tempVec;
-	for (int i = 0; i < vec.size()-1; i++) {
-		//printf("size:%d", vec.size());
+	for (int i = 0; i < vec.size() - 1; i++) {
+		printf("size:%d", vec.size());
 		Point p0 = vec.at(i);
 		Point p1 = vec.at(i + 1);
-
-		
 
 		float len0 = sqrt((pow(p0.xcord, 2)) + (pow(p0.ycord, 2)) + (pow(p0.zcord, 2))); //magnitube
 		float len1 = sqrt((pow(p1.xcord, 2)) + (pow(p1.ycord, 2)) + (pow(p1.zcord, 2)));
 		globalP0 = p0;
 		globalP1 = p1;
-		
+
 		p0.xcord = p0.xcord / len0; //normalize
 		p0.ycord = p0.ycord / len0;
 		p0.zcord = p0.zcord / len0;
@@ -186,10 +184,8 @@ void slerp(vector<Point> vec) {
 
 
 		float dot = (p0.xcord * p1.xcord) + (p0.ycord * p1.ycord) + (p0.zcord * p1.zcord); //dot product
-		
-		float angle = acos(dot / (1 * 1)); //angle between two vectors
-		
-		//printf("angle:%f\n", angle);
+
+		float angle = acos(dot / (1*1)); //angle between two vectors
 
 		Point nextPoint;
 		float alpha = (sin(1 - t) * angle) / sin(angle);
@@ -197,82 +193,67 @@ void slerp(vector<Point> vec) {
 		nextPoint.xcord = alpha * p0.xcord + beta * p1.xcord;
 		nextPoint.ycord = alpha * p0.ycord + beta * p1.ycord;
 		nextPoint.zcord = alpha * p0.zcord + beta * p0.zcord;
-
-		float tempxcord = nextPoint.xcord;
-		float tempycord = nextPoint.ycord;
-		float tempzcord = nextPoint.zcord;
-
-
-		//adjust rotation for next vector
-		 //nextPoint.xcord = tempxcord* m[0] + tempycord * m[1] + tempzcord * m[2];
-		// nextPoint.ycord = tempxcord * m[4] + tempycord * m[5] + tempzcord * m[6];
-		// nextPoint.zcord = tempxcord * m[8] + tempycord * m[9] + tempzcord * m[10];
-
 		tempVec.push_back(nextPoint);
-
-
 		globalAngle = angle;
 
-		if (DeCastelijauCheckboxBool) {
-			glBegin(GL_LINE_STRIP);
-			t = tVar;
-		}
 		glColor3f(0.0, 1.0, 0.0);
-		for (float i = 0; i <= 1; i += 0.05f) { //draw line between points
+
+		if (DeCastelijauCheckboxBool && (abs(t-tVar)<0.01)) {
+			glBegin(GL_LINE_STRIP);
+		}
+
+		for (float i = 0; i <= 1; i += 0.05f) {
 			float alpha = sin((1 - i) * angle) / sin(angle);
 			float beta = sin(i * angle) / sin(angle);
-
-			float fixedP0xcord, fixedP0ycord, fixedP0zcord, fixedP1xcord, fixedP1ycord, fixedP1zcord;
-			glGetFloatv(GL_MODELVIEW_MATRIX, m);
-
-		
-
 			float xcord = alpha * p0.xcord + beta * p1.xcord;
 			float ycord = alpha * p0.ycord + beta * p1.ycord;
 			float zcord = alpha * p0.zcord + beta * p1.zcord;
-			
 
-			glGetFloatv(GL_MODELVIEW_MATRIX, m);
-			float tempxcord = xcord;
-			float tempycord = ycord;
-			float tempzcord = zcord;
-			//if (abs(i - t) <= 0.01) {
-				//only draw DeCastelijau line at set T
-				glVertex3f(tempxcord, tempycord, tempzcord);
-			//}
-			if (vec.size() == 2 && ::vec.size()>2) {
-				if (abs(i - timevar) <= 0.005) {
-					//point to "save"
-					//this is bezier curve
-					cubex = tempxcord;
-					cubey = tempycord;
-					cubez = tempzcord;
+			/*glGetFloatv(GL_MODELVIEW_MATRIX, m);
+			 xcord = (xcord * m[0] + ycord * m[1] + zcord * m[2]);
+			 ycord = xcord * m[4] + ycord * m[5] + zcord * m[6];
+			 zcord = xcord * m[8] + ycord * m[9] + zcord * m[10];
+			 */
 
-					//cubex = xcordDraw;
-					//cubey = ycordDraw;
-					//cubez = zcordDraw;
+			if (DeCastelijauCheckboxBool && (abs(t - tVar) < 0.01)) {
+				glVertex3f(xcord, ycord, zcord);
 
-					drawCube = true;
+			}
+			if (CurveCheckboxBool) {
+				if (vec.size() == 2 && ::vec.size() > 2) {
+					if (abs(i - timevar) <= 0.05) {
+						//point to "save"
+						cubex = xcord;
+						cubey = ycord;
+						cubez = zcord;
+
+						//cubex = xcordDraw;
+						//cubey = ycordDraw;
+						//cubez = zcordDraw;
+
+						drawCube = true;
+					}
 				}
 			}
 
-		}
-		if (DeCastelijauCheckboxBool) {
-			glEnd();
+		}//end for
 
+
+		if (DeCastelijauCheckboxBool && (abs(t - tVar) < 0.01)) {
+			glEnd();
 		}
+
 		//store xyz for cube draw
 		if (drawCube) {
 			drawCubeLocation(cubex, cubey, 0.01, cubez, 1.0, 1.0, 0.0);
 			drawCube = false;
 		}
-		
+
+
 	}
 
 	slerp(tempVec);
-}
-
-
+}//end slerp
 void init() {
 	// Set initial OpenGL states
 	GLfloat mat_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -397,14 +378,9 @@ void display() {
 
 	}
 	
-	if (vec.size() > 1) {	
-		if (CurveCheckboxBool) {
-			for (float i = 0.0; i <= 1.0; i += 0.01) {
-				timevar = i; //TOGGLE FOR INTERMEDIATE INTERPOLATIONS
-				slerp(vec);
-			}
-		}
-		else {
+	if (vec.size() > 1){
+		for (float i = 0.0; i <= 1.0; i += 0.01) {
+			timevar = i; //TOGGLE FOR INTERMEDIATE INTERPOLATIONS
 			slerp(vec);
 		}
 	}
