@@ -196,7 +196,7 @@ void slerp(vector<Point> vec) {
 		tempVec.push_back(nextPoint);
 		globalAngle = angle;
 
-		glColor3f(0.0, 1.0, 0.0);
+		glColor3f(0.0, 0.5, 0.0);
 
 		if (DeCastelijauCheckboxBool && (abs(t-tVar)<0.01)) {
 			glBegin(GL_LINE_STRIP);
@@ -355,9 +355,6 @@ void display() {
 	}
 	glFlush();
 	//use combo of solid + slightly bigger wire sphere to map "grid" to sphere
-
-	//glColor3f(0.0, 0.0, 1.0);
-	//glutSolidSphere(radius, 20, 20);
 
 	// Flush buffers to screen
 	if (addPoint) {
@@ -566,7 +563,12 @@ void myGlutIdle(void)
 	//glutPostRedisplay();
 }
 
-
+void resetPoints(int val) {
+	//called upon reset button click
+	//keep all checkboxes same clear Points
+	vec.clear();
+	glutPostRedisplay();
+}
 
 
 /*
@@ -575,7 +577,7 @@ The main function.
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
-	glutInitWindowSize(480, 480);
+	glutInitWindowSize(640, 640);
 	main_window = glutCreateWindow("Solid Sphere");
 	zRotated = 30.0;
 	xRotated = 0;
@@ -592,7 +594,7 @@ int main(int argc, char** argv)
 
 	
 
-	GLUI* glui = GLUI_Master.create_glui("GLUI", 0, 400, 400);
+	GLUI* glui = GLUI_Master.create_glui("GLUI", 0, 640, 640);
 	glui->set_main_gfx_window(main_window);
 
 
@@ -614,6 +616,11 @@ int main(int argc, char** argv)
 	GLUI_Panel* functionPanel = glui->add_panel("Function Panel");
 	segment_spinner = glui->add_spinner("T Val",GLUI_SPINNER_FLOAT, &tVar);
 	segment_spinner->set_float_limits(0.0, 1.0);
+
+	GLUI_Button* reset = glui->add_button("Clear Control Points", 1, resetPoints);
+
+
+	GLUI_Button* quit = glui->add_button("Exit", 0, (GLUI_Update_CB)exit);
 
 	GLUI_Master.set_glutIdleFunc(myGlutIdle);
 
