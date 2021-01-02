@@ -68,9 +68,6 @@ float m[16];
 BOOLEAN addPoint = false;
 BOOLEAN lmbd = false;
 
-float globalAngle = 0;
-Point globalP0;
-Point globalP1;
 
 float timevar= 0.26f;
 float tVar = 0.26;
@@ -164,16 +161,14 @@ void slerp(vector<Point> vec) {
 	BOOLEAN specialColor = false;
 
 	vector<Point> tempVec;
-	for (int i = 0; i < vec.size() - 1; i++) {
+	for (int i = 0; i < vec.size() - 1; i++) { //use all points in this stage to create the points in the next stage
 		Point p0 = vec.at(i);
 		Point p1 = vec.at(i + 1);
 
-		float len0 = sqrt((pow(p0.xcord, 2)) + (pow(p0.ycord, 2)) + (pow(p0.zcord, 2))); //magnitube
-		float len1 = sqrt((pow(p1.xcord, 2)) + (pow(p1.ycord, 2)) + (pow(p1.zcord, 2)));
-		globalP0 = p0;
-		globalP1 = p1;
+		float len0 = sqrt((pow(p0.xcord, 2)) + (pow(p0.ycord, 2)) + (pow(p0.zcord, 2))); //magnitude of V1
+		float len1 = sqrt((pow(p1.xcord, 2)) + (pow(p1.ycord, 2)) + (pow(p1.zcord, 2))); //magnitude of V2
 
-		p0.xcord = p0.xcord / len0; //normalize
+		p0.xcord = p0.xcord / len0; //normalize V1 and V2
 		p0.ycord = p0.ycord / len0;
 		p0.zcord = p0.zcord / len0;
 
@@ -183,28 +178,35 @@ void slerp(vector<Point> vec) {
 
 
 
-		float dot = (p0.xcord * p1.xcord) + (p0.ycord * p1.ycord) + (p0.zcord * p1.zcord); //dot product
+		float dot = (p0.xcord * p1.xcord) + (p0.ycord * p1.ycord) + (p0.zcord * p1.zcord); //dot product of Normalized vectors
 
-		float angle = acos(dot / (1*1)); //angle between two vectors
+		float angle = acos(dot / (1*1)); //angle between two Normalized vectors IE len of both = 1
 
 		Point nextPoint;
-		float alpha = (sin(1 - t) * angle) / sin(angle);
-		float beta = sin(t * angle) / sin(angle);
-		nextPoint.xcord = alpha * p0.xcord + beta * p1.xcord;
+		float alpha = (sin(1 - t) * angle) / sin(angle); //alpha equation
+		float beta = sin(t * angle) / sin(angle); //bet equation
+		//calculates based on current t value from loop in display func
+
+		nextPoint.xcord = alpha * p0.xcord + beta * p1.xcord; //calculate coords of next point using current P0 and P1
 		nextPoint.ycord = alpha * p0.ycord + beta * p1.ycord;
 		nextPoint.zcord = alpha * p0.zcord + beta * p0.zcord;
-		tempVec.push_back(nextPoint);
-		globalAngle = angle;
 
-		glColor3f(0.0, 0.5, 0.0);
+		printf("P0 xcord: %f p0 ycord: %f p0:zcord%f\np1xcord: %f p1ycord: %f p1zcord: %f\n", p0.xcord, p0.ycord, p0.zcord, p1.xcord, p1.ycord, p1.zcord);
+		printf("angle: %f  dot: %f\n!!!!!!!!\n", angle, dot);
 
-		if (DeCastelijauCheckboxBool && (abs(t-tVar)<0.01)) {
+
+		tempVec.push_back(nextPoint); //store next point for next stage of computation
+
+		glColor3f(0.0, 0.5, 0.0); //set to green
+
+		if (DeCastelijauCheckboxBool && (abs(t-tVar)<0.01)) { //only draw if check box is marked AND current iteration matches the current spinner t value
 			glBegin(GL_LINE_STRIP);
 		}
 
 		for (float i = 0; i <= 1; i += 0.05f) {
-			float alpha = sin((1 - i) * angle) / sin(angle);
-			float beta = sin(i * angle) / sin(angle);
+			//this represents T steps
+			float alpha = sin((1 - i) * angle) / sin(angle); //calculate alpha for current t
+			float beta = sin(i * angle) / sin(angle); //calculate beta for current t
 			float xcord = alpha * p0.xcord + beta * p1.xcord;
 			float ycord = alpha * p0.ycord + beta * p1.ycord;
 			float zcord = alpha * p0.zcord + beta * p1.zcord;
@@ -220,12 +222,23 @@ void slerp(vector<Point> vec) {
 
 			}
 			if (CurveCheckboxBool) {
+				//draw curve
 				if (vec.size() == 2 && ::vec.size() > 2) {
 					if (abs(i - timevar) <= 0.05) {
 						//point to "save"
+
+						float tempxcord = xcord;
+						float tempycord = ycord;
+						float tempzcord = zcord;
+
+
 						cubex = xcord;
 						cubey = ycord;
 						cubez = zcord;
+
+
+
+
 
 						if (ftCheckboxBool && (abs(t-tVar)<0.01)) {
 							//draw in other color!
@@ -263,7 +276,7 @@ void slerp(vector<Point> vec) {
 
 	}
 
-	slerp(tempVec);
+	slerp(tempVec);  //redo slerp with vec loaded with next stage points
 }//end slerp
 void init() {
 	// Set initial OpenGL states
@@ -372,7 +385,7 @@ void display() {
 		vec.push_back(point);
 		addPoint = false;
 
-	}
+	}//end add point if
 
 	for (int i = 0; i < vec.size(); i++) {
 		glBegin(GL_POLYGON);
@@ -388,7 +401,7 @@ void display() {
 	}
 	
 	if (vec.size() > 1){
-		for (float i = 0.0; i <= 1.0; i += 0.01) {
+		for (float i = 0.0; i <= 1.0; i += 0.01) { // t = [0,1]
 			timevar = i; //TOGGLE FOR INTERMEDIATE INTERPOLATIONS
 			slerp(vec);
 		}
@@ -410,11 +423,7 @@ void keyboard(unsigned char k, int x, int y)
 	{
 		exit(0);
 	};
-	printf("char pressed: %u\n", k);
-	if (k == 9) {
-		//tab pushed
-		//toggle real line and intermediate interpolations
-	}
+	
 }
 
 
@@ -524,16 +533,19 @@ void mouseMotion(int x, int y) {
 		}
 		float localx = 2.0f * ((GLfloat)x + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_WIDTH)) - 1.0f; //convert to same scale as points
 		float localy = -1 * (2.0f * ((GLfloat)y + 0.5f) / (GLfloat)(glutGet(GLUT_WINDOW_HEIGHT)) - 1.0f);
+
 		float templocalx = localx;
+		float templocaly = localy;
+
 
 
 		double zval = sqrt(abs(pow(localx, 2) + pow(localy, 2) - pow(radius, 2)));
 		glGetFloatv(GL_MODELVIEW_MATRIX, m);
-		localx = (localx * m[0] + localy * m[1] + zval * m[2]); //fix points to align with rotation/align with x,y, coords as points on sphere
+		localx = (templocalx * m[0] + templocaly * m[1] + zval * m[2]); //fix points to align with rotation/align with x,y, coords as points on sphere
 
-		localy = templocalx * m[4] + localy * m[5] + zval * m[6];
+		localy = templocalx * m[4] + templocaly * m[5] + zval * m[6];
 
-		float zvalFinal = localx * m[8] + localy * m[9] + zval * m[10];
+		float zvalFinal = templocalx * m[8] + templocaly * m[9] + zval * m[10];
 
 
 		vec.at(index).xcord = localx;
