@@ -203,7 +203,7 @@ void slerp(vector<Point> vec) {
 
 		tempVec.push_back(nextPoint); //store next point for next stage of computation
 
-		glColor3f(0.0, 0.5, 0.0); //set to green
+		glColor3f(0.0, 1.0, 0.0); //set to green
 
 		if (DeCastelijauCheckboxBool && (abs(t-tVar)<0.01)) { //only draw if check box is marked AND current iteration matches the current spinner t value
 			glBegin(GL_LINE_STRIP);
@@ -301,7 +301,7 @@ void slerp(vector<Point> vec) {
 		glEnd();
 
 		//store xyz for cube draw
-		if (drawCube) {
+		if (drawCube && ticksCheckboxBool) {
 			if (specialColor) {
 				drawCubeLocation(cubex, cubey, 0.02, cubez, 1.0, 1.0, 1.0);
 				specialColor = false;
@@ -310,6 +310,10 @@ void slerp(vector<Point> vec) {
 				drawCubeLocation(cubex, cubey, 0.01, cubez, 1.0, 1.0, 0.0);
 			}
 			drawCube = false;
+		}
+		if (specialColor) {
+			drawCubeLocation(cubex, cubey, 0.02, cubez, 1.0, 1.0, 1.0);
+				specialColor = false;
 		}
 
 
@@ -656,7 +660,7 @@ int main(int argc, char** argv)
 
 	
 
-	GLUI* glui = GLUI_Master.create_glui("GLUI", 0, 640, 640);
+	GLUI* glui = GLUI_Master.create_glui("GLUI", 0, 840, 640);
 	glui->set_main_gfx_window(main_window);
 
 
