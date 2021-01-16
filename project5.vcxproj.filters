@@ -43,24 +43,24 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.dll">
+    <None Include="freeglutd.dll">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.ilk">
+    <None Include="freeglutd.ilk">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.pdb">
+    <None Include="reeglutd.pdb">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.lib">
+    <Library Include="freeglutd.lib">
       <Filter>Source Files</Filter>
     </Library>
-    <Library Include="..\..\..\Desktop\freshglui\glui_etc\glui_static.lib">
+    <Library Include="glui_static.lib">
       <Filter>Source Files</Filter>
     </Library>
-    <Library Include="..\..\..\Desktop\freshglui\glui_etc\glui_staticd.lib">
+    <Library Include="glui_staticd.lib">
       <Filter>Source Files</Filter>
     </Library>
   </ItemGroup>

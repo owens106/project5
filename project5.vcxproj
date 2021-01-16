@@ -153,14 +153,14 @@
     <ClInclude Include="glui.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.dll" />
-    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.ilk" />
-    <None Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.pdb" />
+    <None Include="freeglutd.dll" />
+    <None Include="freeglutd.ilk" />
+    <None Include="reeglutd.pdb" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\..\Desktop\freshglui\glui_etc\freeglutd.lib" />
-    <Library Include="..\..\..\Desktop\freshglui\glui_etc\glui_static.lib" />
-    <Library Include="..\..\..\Desktop\freshglui\glui_etc\glui_staticd.lib" />
+    <Library Include="freeglutd.lib" />
+    <Library Include="glui_static.lib" />
+    <Library Include="glui_staticd.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

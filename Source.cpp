@@ -384,7 +384,7 @@ void display() {
 
 	glScalef(1.0, 1.0, 1.0);
 	// built-in (glut library) function , draw you a sphere.
-	glColor3f(1.0, 1.0, 0.0);
+	glColor3f(0.0, 0.0, 1.0);
 
 
 	if (controlPolyCheckboxBool) {
@@ -397,8 +397,8 @@ void display() {
 			//solid sphere + grid
 			glutSolidSphere(radius, 20, 20);
 
-			glColor3f(0.0, 0.0, 1.0);//blue grid
-			glutWireSphere(radius + 0.01, 20, 20);
+			glColor3f(.18, .09, .20);//yellow grid grid
+			glutWireSphere(radius + 0.001, 20, 20);
 		}
 		else if (!gridCheckboxBool && wirespherePolyCheckboxBool) {
 			glutWireSphere(radius, 20, 20);
