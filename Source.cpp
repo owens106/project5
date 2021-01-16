@@ -126,7 +126,6 @@ void drawCubeLocation(GLfloat xcenter, GLfloat ycenter, GLfloat size, GLfloat zp
 	glEnd();
 
 	glBegin(GL_POLYGON);//top face
-	glColor3f(0.0, 0.0, 1.0);
 	glVertex3f(xcenter + size, ycenter + size, zpos - size); //top right
 	glVertex3f(xcenter + size, ycenter + size, zpos + size); //top right
 	glVertex3f(xcenter - size, ycenter + size, zpos + size); //top left
@@ -209,7 +208,7 @@ void slerp(vector<Point> vec) {
 			glBegin(GL_LINE_STRIP);
 		}
 
-		for (float i = 0; i <= 1; i += 0.05f) {
+		for (float i = 0; i <= 1.05; i += 0.05f) {
 			//this represents T steps
 			float alpha = sin((1 - i) * angle) / sin(angle); //calculate alpha for current t
 			float beta = sin(i * angle) / sin(angle); //calculate beta for current t
@@ -223,7 +222,7 @@ void slerp(vector<Point> vec) {
 			 zcord = xcord * m[8] + ycord * m[9] + zcord * m[10];
 			 */
 
-			if (DeCastelijauCheckboxBool && (abs(t - tVar) < 0.01)) {
+			if (DeCastelijauCheckboxBool && (abs(t - tVar) < 0.005)) {
 				glVertex3f(xcord, ycord, zcord);
 
 			}
